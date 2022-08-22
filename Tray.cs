@@ -6,33 +6,43 @@ namespace EventLogMonitor
 {
     internal class Tray : ApplicationContext
     {
-        private NotifyIcon trayIcon;
+        private NotifyIcon TrayIcon { get; set; }
+        Monitoring monitor;
+
         ContextMenuStrip menu;
 
         public Tray()
         {
-            trayIcon = new NotifyIcon();
+            TrayIcon = new NotifyIcon();
             menu = new ContextMenuStrip();
 
-            trayIcon.Icon = new System.Drawing.Icon("C:\\Users\\patri\\Documents\\Obsidian\\htb.ico");
-            trayIcon.ContextMenuStrip = menu;
+            TrayIcon.Icon = new System.Drawing.Icon("..\\..\\..\\Resources\\app-white.ico");
+            TrayIcon.ContextMenuStrip = menu;
 
-            ToolStripMenuItem readLog = new ToolStripMenuItem("Read log");
-            readLog.Click += new EventHandler(ShowLastLog);
+            ToolStripMenuItem readLog = new ToolStripMenuItem("Start Monitoring");
+            readLog.Click += new EventHandler(StartMonitoring);
+
+            ToolStripMenuItem pauseMonitoring = new ToolStripMenuItem("Pause Monitoring");
+            pauseMonitoring.Click += new EventHandler(PauseMonitoring);
 
             ToolStripMenuItem exitMenu = new ToolStripMenuItem("Exit");
             exitMenu.Click += new EventHandler(Exit);
 
             menu.Items.Add(readLog);
+            menu.Items.Add(pauseMonitoring);
             menu.Items.Add(exitMenu);
 
-            trayIcon.Visible = true;
+            TrayIcon.Visible = true;
         }
 
-        void ShowLastLog(object sender, EventArgs e)
+        void StartMonitoring(object sender, EventArgs e)
         {
-            EventLogParser parser = new EventLogParser("Microsoft-Windows-PowerShell/Operational");
-            MessageBox.Show(parser.ReadLog());
+             monitor = new Monitoring(TrayIcon);
+        }
+
+        void PauseMonitoring(object sender, EventArgs e)
+        {
+            monitor.Watcher.Enabled = false;
         }
 
         void Exit(object sender, EventArgs e)

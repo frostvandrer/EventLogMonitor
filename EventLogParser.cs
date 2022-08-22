@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
@@ -6,38 +7,29 @@ using System.Text;
 
 namespace EventLogMonitor
 {
-    internal class EventLogParser
-    {
-        private EventLogReader Reader { get; set; }
-
-        public EventLogParser(string logName)
+    internal static class EventLogParser
+    {          
+        public static LogEntry? ReadLog(EventLogQuery query, int suspiciousEventID, int recordID)
         {
-            EventLogQuery query = new EventLogQuery(logName, PathType.LogName);
             query.ReverseDirection = true;
 
-            Reader = new EventLogReader(query);
-        }
-           
-        public string ReadLog()
-        {
-            StringBuilder sb = new StringBuilder();
-            
-            using(Reader)
+            using (EventLogReader reader = new EventLogReader(query))
             {
-                for (EventRecord rec = Reader.ReadEvent(); rec != null; rec = Reader.ReadEvent())
+                for (EventRecord rec = reader.ReadEvent(); rec != null; rec = reader.ReadEvent())
                 {
-                    bool happenedToday = rec.TimeCreated > DateTime.Now.AddDays(-1);
-
-                    if (rec.Id == 4104 && happenedToday)
+                    if (rec.RecordId == recordID)
                     {
-                        sb.Append($"Event ID: {rec.Id}\n");
-                        sb.Append($"Event Name: {rec.TaskDisplayName}\n");
-                        sb.Append($"Timestamp: {rec.TimeCreated}\n\n");
+                        break;
+                    }
+
+                    if (rec.Id == suspiciousEventID)
+                    {
+                        return new LogEntry(rec.Id, rec.TaskDisplayName, (int)rec.RecordId, rec.TimeCreated, rec.FormatDescription());
                     }
                 }
             }
-                    
-            return sb.ToString();
+
+            return null;
         }
     }
 }
