@@ -24,7 +24,7 @@ namespace EventLogMonitor
 
                     if (rec.Id == suspiciousEventID)
                     {
-                        return new LogEntry(rec.Id, rec.TaskDisplayName, (int)rec.RecordId, rec.TimeCreated, rec.FormatDescription());
+                        return new LogEntry(rec);
                     }
                 }
             }

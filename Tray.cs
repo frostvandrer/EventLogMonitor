@@ -33,6 +33,8 @@ namespace EventLogMonitor
             menu.Items.Add(exitMenu);
 
             TrayIcon.Visible = true;
+
+            monitor = new Monitoring(TrayIcon);
         }
 
         void StartMonitoring(object sender, EventArgs e)

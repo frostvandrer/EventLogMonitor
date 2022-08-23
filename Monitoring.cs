@@ -7,10 +7,10 @@ namespace EventLogMonitor
     internal class Monitoring
     {
         NotifyIcon trayIcon;
-        string popUpMessage;
-        int lastRecordID = 0;
-        
-        public EventLogWatcher Watcher { get; set; }
+        string popUpMessage = String.Empty;
+        long? lastRecordID = 0;
+
+        public EventLogWatcher? Watcher { get; set; }
 
         private string PowerShellLogName = "Microsoft-Windows-PowerShell/Operational";
 
@@ -27,25 +27,34 @@ namespace EventLogMonitor
             EventLogQuery query = new EventLogQuery(PowerShellLogName, PathType.LogName);
             Watcher = new EventLogWatcher(query);
 
-            Watcher.EventRecordWritten += new EventHandler<EventRecordWrittenEventArgs>((sender, e) => PowerShellEventLogUpdateHandler(sender, e, query, 4104));
+            Watcher.EventRecordWritten += new EventHandler<EventRecordWrittenEventArgs>(PowerShellEventLogUpdateHandler);
             Watcher.Enabled = true;
         }
 
-        private void PowerShellEventLogUpdateHandler(object? sender, EventRecordWrittenEventArgs args, EventLogQuery query, int eventID)
+        private void PowerShellEventLogUpdateHandler(object? sender, EventRecordWrittenEventArgs e)
         {
-            LogEntry? entry = EventLogParser.ReadLog(query, eventID, lastRecordID);
+            int suspiciousEventID = 4104;
 
-            if (entry != null)
+            if (e.EventRecord.Id != suspiciousEventID)
             {
-                lastRecordID = entry.RecordID;
+                return;
+            }
 
-                if (!entry.Message.Contains(msExecutedSignature))
+            LogEntry? entry = LogEntry.CreateObj(e.EventRecord);
+
+            if (entry == null)
+            {
+                return;
+            }
+
+            lastRecordID = entry.RecordID;
+
+            if (!entry.Message.Contains(msExecutedSignature))
+            {
+                if (entry.Message.Contains("Creating Scriptblock text (1 of") && !entry.Message.Contains(msExecutedSignature))
                 {
-                    if (entry.Message.Contains("Creating Scriptblock text (1 of") && !entry.Message.Contains(msExecutedSignature))
-                    {
-                        popUpMessage = entry.Message;
-                        SuspiciousActivityDetected();
-                    }
+                    popUpMessage = entry.Message;
+                    SuspiciousActivityDetected();
                 }
             }
         }
