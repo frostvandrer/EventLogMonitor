@@ -6,9 +6,9 @@ namespace EventLogMonitor
 {
     internal class Monitoring
     {
-        NotifyIcon trayIcon;
-        string popUpMessage = String.Empty;
-        long? lastRecordID = 0;
+        private NotifyIcon trayIcon;
+        private string popUpMessage = String.Empty;
+        private long? lastRecordID = 0;
 
         public EventLogWatcher? Watcher { get; set; }
 
