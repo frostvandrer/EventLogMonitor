@@ -8,7 +8,6 @@ namespace EventLogMonitor
     {
         private NotifyIcon trayIcon;
         private string popUpMessage = String.Empty;
-        private long? lastRecordID = 0;
 
         public EventLogWatcher? Watcher { get; set; }
 
@@ -46,8 +45,6 @@ namespace EventLogMonitor
             {
                 return;
             }
-
-            lastRecordID = entry.RecordID;
 
             if (!entry.Message.Contains(msExecutedSignature))
             {
