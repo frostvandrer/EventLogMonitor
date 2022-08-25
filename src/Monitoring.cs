@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.Diagnostics.Eventing.Reader;
+using EventLogMonitor.Events;
+using System.Threading.Tasks;
 
 namespace EventLogMonitor
 {
@@ -9,54 +11,113 @@ namespace EventLogMonitor
         private NotifyIcon trayIcon;
         private string popUpMessage = String.Empty;
 
-        public EventLogWatcher? Watcher { get; set; }
+        private readonly string PowerShellLogName = "Microsoft-Windows-PowerShell/Operational";
+        private readonly string SecurityLogName = "Security";
 
-        private string PowerShellLogName = "Microsoft-Windows-PowerShell/Operational";
-
-        private string msExecutedSignature = "Microsoft Corporation. All rights reserved.";
+        public EventLogWatcher? PowerShellWatcher { get; set; }
+        public EventLogWatcher? SecurityWatcher { get; set; }
 
         public Monitoring(NotifyIcon trayIcon)
         {
             this.trayIcon = trayIcon;
             MonitorPowershell();
+            MonitorSecurity();
         }
 
-        public void MonitorPowershell()
+        public async void MonitorPowershell()
         {
-            EventLogQuery query = new EventLogQuery(PowerShellLogName, PathType.LogName);
-            Watcher = new EventLogWatcher(query);
-
-            Watcher.EventRecordWritten += new EventHandler<EventRecordWrittenEventArgs>(PowerShellEventLogUpdateHandler);
-            Watcher.Enabled = true;
-        }
-
-        private void PowerShellEventLogUpdateHandler(object? sender, EventRecordWrittenEventArgs e)
-        {
-            int suspiciousEventID = 4104;
-
-            if (e.EventRecord.Id != suspiciousEventID)
+            await Task.Run(() =>
             {
-                return;
-            }
-
-            LogEntry? entry = LogEntry.CreateObj(e.EventRecord);
-
-            if (entry == null)
-            {
-                return;
-            }
-
-            if (!entry.Message.Contains(msExecutedSignature))
-            {
-                if (entry.Message.Contains("Creating Scriptblock text (1 of") && !entry.Message.Contains(msExecutedSignature))
+                try
                 {
-                    popUpMessage = entry.Message;
+                    EventLogQuery query = new EventLogQuery(PowerShellLogName, PathType.LogName);
+                    
+                    PowerShellWatcher = new EventLogWatcher(query);
+                    PowerShellWatcher.EventRecordWritten += new EventHandler<EventRecordWrittenEventArgs>(SuspiciousEventHandler);
+                    PowerShellWatcher.Enabled = true;
+
+                    for (; ; )
+                    {
+                        // Wait for events to occur. 
+                        System.Threading.Thread.Sleep(1000);
+                    }
+                }
+                catch (EventLogReadingException e)
+                {
+                    MessageBox.Show(e.Message);
+                }
+                finally
+                {
+                    // Stop listening to events
+                    PowerShellWatcher.Enabled = false;
+
+                    if (PowerShellWatcher != null)
+                    {
+                        PowerShellWatcher.Dispose();
+                    }
+                }
+            });
+        }
+
+        public async Task MonitorSecurity()
+        {
+            await Task.Run(() =>
+            {
+                try
+                {
+                    EventLogQuery query = new EventLogQuery(SecurityLogName, PathType.LogName);
+
+                    SecurityWatcher = new EventLogWatcher(query);
+                    SecurityWatcher.EventRecordWritten += new EventHandler<EventRecordWrittenEventArgs>(SuspiciousEventHandler);
+                    SecurityWatcher.Enabled = true;
+
+                    for (; ; )
+                    {
+                        // Wait for events to occur. 
+                        System.Threading.Thread.Sleep(1000);
+                    }
+                }
+                catch (EventLogReadingException e)
+                {
+                    MessageBox.Show(e.Message);
+                }
+                finally
+                {
+                    // Stop listening to events
+                    SecurityWatcher.Enabled = false;
+
+                    if (SecurityWatcher != null)
+                    {
+                        SecurityWatcher.Dispose();
+                    }
+                }
+            });
+        }
+
+        private void SuspiciousEventHandler(object? sender, EventRecordWrittenEventArgs e)
+        {
+            if (e.EventRecord == null)
+            {
+                return;
+            }
+
+            if (e.EventRecord.LogName == PowerShellLogName)
+            {
+                if (PowerShellEvent.IsSuspicious(e))
+                {
+                    SuspiciousActivityDetected();
+                }
+            }
+            else if (e.EventRecord.LogName == SecurityLogName)
+            {
+                if (SecurityEvent.IsSuspicious(e))
+                {
                     SuspiciousActivityDetected();
                 }
             }
         }
 
-        private void SuspiciousActivityDetected()
+        public void SuspiciousActivityDetected()
         {
             trayIcon.ShowBalloonTip(3000, "Suspicious behaviour detected", "Click here to show more information", ToolTipIcon.Warning);
             trayIcon.BalloonTipClicked += new EventHandler(PopMessageBox);

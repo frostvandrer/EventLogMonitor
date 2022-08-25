@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "/aCQxdfb0/fgPWNZgXV0XT1ykMMrbSeb/TsW31kkGrTHqZ015ho5XGjRYUGVsFi6NpfnPzJs+pkuLXfbnjN8WQ==",
+  "dgSpecHash": "u4/Senbuf66AjGbd5yHl+prYvK/3hYdmNDiBqzT7w25wSaaAJd8hEtuEWqMbMkOTNO8ngyZRlFgahYzgMghDNg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\patri\\Documents\\Programming projects\\EventLogMonitor\\EventLogMonitor.csproj",
+  "projectFilePath": "C:\\Users\\patri\\Documents\\Programming projects\\EventLogMonitor\\src\\EventLogMonitor.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

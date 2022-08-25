@@ -44,7 +44,7 @@ namespace EventLogMonitor
 
         void PauseMonitoring(object sender, EventArgs e)
         {
-            monitor.Watcher.Enabled = false;
+            monitor.PowerShellWatcher.Enabled = false;
         }
 
         void Exit(object sender, EventArgs e)

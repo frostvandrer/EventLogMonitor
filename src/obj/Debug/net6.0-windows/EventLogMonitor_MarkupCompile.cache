@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\patri\Documents\Programming projects\EventLogMonitor\obj\Debug\net6.0-windows\
+C:\Users\patri\Documents\Programming projects\EventLogMonitor\src\obj\Debug\net6.0-windows\
 EventLogMonitor
 none
 false
 TRACE;DEBUG;NET;NET6_0;NETCOREAPP
-C:\Users\patri\Documents\Programming projects\EventLogMonitor\App.xaml
-11407045341
+C:\Users\patri\Documents\Programming projects\EventLogMonitor\src\App.xaml
 
-71162881873
+
+9-666908795
 2031031078937
-MainWindow.xaml;
+
 
 False
 

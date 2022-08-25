@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\patri\\Documents\\Programming projects\\EventLogMonitor\\EventLogMonitor.csproj",
+      "projectUniqueName": "C:\\Users\\patri\\Documents\\Programming projects\\EventLogMonitor\\src\\EventLogMonitor.csproj",
       "projectName": "EventLogMonitor",
-      "projectPath": "C:\\Users\\patri\\Documents\\Programming projects\\EventLogMonitor\\EventLogMonitor.csproj",
+      "projectPath": "C:\\Users\\patri\\Documents\\Programming projects\\EventLogMonitor\\src\\EventLogMonitor.csproj",
       "packagesPath": "C:\\Users\\patri\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\patri\\Documents\\Programming projects\\EventLogMonitor\\obj\\",
+      "outputPath": "C:\\Users\\patri\\Documents\\Programming projects\\EventLogMonitor\\src\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\patri\\AppData\\Roaming\\NuGet\\NuGet.Config",
