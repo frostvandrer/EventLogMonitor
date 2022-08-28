@@ -32,3 +32,4 @@ C:\Users\patri\Documents\Programming projects\EventLogMonitor\src\obj\Release\ne
 C:\Users\patri\Documents\Programming projects\EventLogMonitor\src\obj\Release\net6.0-windows\EventLogMonitor.pdb
 C:\Users\patri\Documents\Programming projects\EventLogMonitor\src\obj\Release\net6.0-windows\EventLogMonitor.genruntimeconfig.cache
 C:\Users\patri\Documents\Programming projects\EventLogMonitor\src\obj\Release\net6.0-windows\ref\EventLogMonitor.dll
+C:\Users\patri\Documents\Programming projects\EventLogMonitor\src\obj\Release\net6.0-windows\EventLogMonitor_Content.g.cs

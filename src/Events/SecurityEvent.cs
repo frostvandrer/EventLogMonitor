@@ -2,9 +2,11 @@
 
 namespace EventLogMonitor.Events
 {
-    internal class SecurityEvent
+    internal class SecurityEvent : BaseEvent
     {
-        public static bool IsSuspicious(EventRecordWrittenEventArgs e)
+        public SecurityEvent() { }
+
+        public override bool IsSuspicious(EventRecordWrittenEventArgs e)
         {
             LogEntry? entry = LogEntry.CreateObj(e.EventRecord);
 
@@ -25,7 +27,7 @@ namespace EventLogMonitor.Events
         {
             int suspiciousEventID = 4720;
 
-            return eventID != suspiciousEventID;
+            return eventID == suspiciousEventID;
         }
     }
 }

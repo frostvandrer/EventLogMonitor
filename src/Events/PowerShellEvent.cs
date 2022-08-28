@@ -2,13 +2,13 @@
 
 namespace EventLogMonitor.Events
 {
-    internal static class PowerShellEvent
+    internal class PowerShellEvent : BaseEvent
     {
-        private static readonly string PowerShellLogName = "Microsoft-Windows-PowerShell/Operational";
-
         private static readonly string msExecutedSignature = "Microsoft Corporation. All rights reserved.";
 
-        public static bool IsSuspicious(EventRecordWrittenEventArgs e)
+        public PowerShellEvent() { }
+
+        public override bool IsSuspicious(EventRecordWrittenEventArgs e)
         {
             LogEntry? entry = LogEntry.CreateObj(e.EventRecord);
 
@@ -17,7 +17,7 @@ namespace EventLogMonitor.Events
                 return false;
             }
 
-            if(ExecuteRemoteCommand(entry))
+            if (ExecuteRemoteCommand(entry))
             {
                 return true;
             }

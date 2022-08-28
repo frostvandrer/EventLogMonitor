@@ -9,7 +9,7 @@ namespace EventLogMonitor
     internal class Monitoring
     {
         private NotifyIcon trayIcon;
-        private string popUpMessage = String.Empty;
+        private string popUpMessage = string.Empty;
 
         private readonly string PowerShellLogName = "Microsoft-Windows-PowerShell/Operational";
         private readonly string SecurityLogName = "Security";
@@ -20,21 +20,22 @@ namespace EventLogMonitor
         public Monitoring(NotifyIcon trayIcon)
         {
             this.trayIcon = trayIcon;
-            MonitorPowershell();
-            MonitorSecurity();
+
+            _ = MonitorLog(PowerShellWatcher, PowerShellLogName);
+            _ = MonitorLog(SecurityWatcher, SecurityLogName);
         }
 
-        public async void MonitorPowershell()
+        public async Task MonitorLog(EventLogWatcher? w, string logName)
         {
             await Task.Run(() =>
             {
                 try
                 {
-                    EventLogQuery query = new EventLogQuery(PowerShellLogName, PathType.LogName);
-                    
-                    PowerShellWatcher = new EventLogWatcher(query);
-                    PowerShellWatcher.EventRecordWritten += new EventHandler<EventRecordWrittenEventArgs>(SuspiciousEventHandler);
-                    PowerShellWatcher.Enabled = true;
+                    EventLogQuery query = new EventLogQuery(logName, PathType.LogName);
+
+                    w = new EventLogWatcher(query);
+                    w.EventRecordWritten += new EventHandler<EventRecordWrittenEventArgs>(SuspiciousEventHandler);
+                    w.Enabled = true;
 
                     for (; ; )
                     {
@@ -48,47 +49,15 @@ namespace EventLogMonitor
                 }
                 finally
                 {
-                    // Stop listening to events
-                    PowerShellWatcher.Enabled = false;
-
-                    if (PowerShellWatcher != null)
+                    if (w != null)
                     {
-                        PowerShellWatcher.Dispose();
-                    }
-                }
-            });
-        }
+                        // Stop listening to events
+                        w.Enabled = false;
 
-        public async Task MonitorSecurity()
-        {
-            await Task.Run(() =>
-            {
-                try
-                {
-                    EventLogQuery query = new EventLogQuery(SecurityLogName, PathType.LogName);
-
-                    SecurityWatcher = new EventLogWatcher(query);
-                    SecurityWatcher.EventRecordWritten += new EventHandler<EventRecordWrittenEventArgs>(SuspiciousEventHandler);
-                    SecurityWatcher.Enabled = true;
-
-                    for (; ; )
-                    {
-                        // Wait for events to occur. 
-                        System.Threading.Thread.Sleep(1000);
-                    }
-                }
-                catch (EventLogReadingException e)
-                {
-                    MessageBox.Show(e.Message);
-                }
-                finally
-                {
-                    // Stop listening to events
-                    SecurityWatcher.Enabled = false;
-
-                    if (SecurityWatcher != null)
-                    {
-                        SecurityWatcher.Dispose();
+                        if (w != null)
+                        {
+                            w.Dispose();
+                        }
                     }
                 }
             });
@@ -103,15 +72,21 @@ namespace EventLogMonitor
 
             if (e.EventRecord.LogName == PowerShellLogName)
             {
-                if (PowerShellEvent.IsSuspicious(e))
+                PowerShellEvent pe = new PowerShellEvent();
+
+                if (pe.IsSuspicious(e))
                 {
+                    popUpMessage = e.EventRecord.FormatDescription();
                     SuspiciousActivityDetected();
                 }
             }
             else if (e.EventRecord.LogName == SecurityLogName)
             {
-                if (SecurityEvent.IsSuspicious(e))
+                SecurityEvent se = new SecurityEvent();
+
+                if (se.IsSuspicious(e))
                 {
+                    popUpMessage = e.EventRecord.FormatDescription();
                     SuspiciousActivityDetected();
                 }
             }
